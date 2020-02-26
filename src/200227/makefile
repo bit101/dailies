@@ -5,4 +5,4 @@ build: clean
 	go run main.go
 
 clean:
-	rm frames/*
+	rm -f frames/*
