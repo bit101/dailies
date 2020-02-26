@@ -19,7 +19,7 @@ const (
 	scale     = 0.0017
 	offset    = 50.0
 	framesDir = "frames"
-	frames    = 75
+	frames    = 70
 )
 
 var (
@@ -38,11 +38,11 @@ func main() {
 }
 
 func render(percent float64) {
-	yy := blmath.Lerp(percent, -radius, height+radius)
+	yy := blmath.Lerp(percent, -radius*2, height+radius*2)
 	surface.ClearRGB(0, 0, 0.6)
 
 	for i := 0.0; i < math.Pi*2; i += res {
-		x, y := math.Cos(i)*radius+width/2, math.Sin(i)*radius+yy
+		x, y := math.Cos(i)*radius+width/2, math.Sin(i)*radius*2+yy
 		a := noise.Perlin2(x*scale, y*scale) * offset
 		surface.LineTo(x+math.Cos(a)*offset, y+math.Sin(a))
 	}
