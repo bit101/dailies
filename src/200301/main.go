@@ -4,65 +4,81 @@ import (
 	"math"
 
 	"github.com/bit101/blgo"
-	"github.com/bit101/blgo/geom"
+	"github.com/bit101/blgo/anim"
+	"github.com/bit101/blgo/blmath"
+	"github.com/bit101/blgo/noise"
 	"github.com/bit101/blgo/util"
 )
 
-type point3d struct {
-	x float64
-	y float64
-	z float64
-}
-
 const (
-	filename = "200229.png"
-	width    = 800.0
-	height   = 800.0
-	xres     = 2.0
-	yres     = 5.0
-	fl       = 600.0
-	pscale   = 0.02
-	a        = -math.Pi / 4
-	b        = math.Pi / 6
+	filename  = "200301.gif"
+	width     = 360.0
+	height    = 360.0
+	xres      = 2.0
+	yres      = 5.0
+	fl        = 600.0
+	pscale    = 0.02
+	a         = -math.Pi / 4
+	b         = math.Pi / 6
+	frames    = 55
+	framesDir = "frames"
+	size      = 140.0
 )
 
 var (
-	points []point3d
-	path   []*geom.Point
+	surface *blgo.Surface
 )
 
 func main() {
-	surface := blgo.NewSurface(width, height)
-	surface.ClearRGB(1, 1, 1)
+	surface = blgo.NewSurface(width, height)
 	surface.SetLineWidth(0.5)
-	surface.Translate(width*0.5, height*0.5)
 
-	points = append(points, point3d{-200.0, -200.0, -200.0})
-	points = append(points, point3d{200.0, -200.0, -200.0})
-	points = append(points, point3d{200.0, 200.0, -200.0})
-	points = append(points, point3d{-200.0, 200.0, -200.0})
+	animation := anim.NewAnimation(surface, frames, framesDir)
+	animation.Render(render)
 
-	points = append(points, point3d{-200.0, -200.0, 200.0})
-	points = append(points, point3d{200.0, -200.0, 200.0})
-	points = append(points, point3d{200.0, 200.0, 200.0})
+	util.ConvertToGIF(framesDir, filename, frames)
 
-	project(surface, points[:4])
-	project(surface, append(points[:2], points[5], points[4]))
-	project(surface, append(points[1:3], points[6], points[5]))
-	project(surface, append(points[5:6], points[5]))
-
-	surface.WriteToPNG(filename)
 	util.ViewImage(filename)
 }
 
-func project(surface *blgo.Surface, points []point3d) {
-	for _, p := range points {
-		x := p.x*math.Cos(a) - p.z*math.Sin(a)
-		z := p.z*math.Cos(a) + p.x*math.Sin(a)
-		y := p.y*math.Cos(b) - z*math.Sin(b)
-		z1 := z*math.Cos(b) + p.y*math.Sin(b)
-		scale := fl / (fl + z1 + 200)
-		path = append(path, geom.NewPoint(x*scale, y*scale))
+func render(percent float64) {
+	offset := blmath.LerpSin(percent, 0.0, 20.0)
+	surface.Save()
+	surface.ClearRGB(1, 1, 1)
+	surface.Translate(width*0.5, height*0.4)
+
+	for y := -size; y <= size; y += yres {
+		for x := -size; x <= size; x += xres {
+			z := -size + noise.Perlin2(x*pscale, y*pscale)*offset
+
+			xx, yy := rotateAndProject(a, x, y, z)
+			surface.LineTo(xx, yy)
+		}
+		surface.Stroke()
 	}
-	surface.StrokePath(path, false)
+
+	for y := -size; y <= size; y += yres {
+		for x := -size; x <= size; x += xres {
+			z := -size + noise.Perlin2(x*pscale, y*pscale)*(20.0-offset)
+
+			xx, yy := rotateAndProject(-a, x, y, z)
+			surface.LineTo(xx, yy)
+		}
+		surface.Stroke()
+	}
+	surface.Restore()
+
+}
+
+func rotateAndProject(a, x, y, z float64) (float64, float64) {
+	c := math.Cos(a)
+	s := math.Sin(a)
+	c2 := math.Cos(math.Pi / 6)
+	s2 := math.Sin(math.Pi / 6)
+	xx := x*c - z*s
+	zz := z*c + x*s
+	yy := y*c2 - zz*s2
+	zzz := zz*c2 + y*s2
+	scale := fl / (fl + zzz + 150.0)
+	return xx * scale, yy * scale
 }
