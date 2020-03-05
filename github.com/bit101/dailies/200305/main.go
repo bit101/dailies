@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/bit101/blgo"
@@ -13,8 +12,8 @@ const (
 	height = 800.0
 	width  = 800.0
 	res    = 40.0
-	xres   = 5.0
-	yres   = 5.0
+	xres   = 2.0
+	yres   = 3.0
 )
 
 var methods []func(surface *blgo.Surface)
@@ -24,8 +23,11 @@ var filename = util.ParentDir() + ".png"
 func main() {
 	surface := blgo.NewSurface(width, height)
 	surface.ClearRGB(1, 1, 1)
+	surface.Translate(0.5, 0.5)
+	surface.SetLineWidth(2)
 
 	buffer := blgo.NewSurface(width, height)
+	buffer.ClearRGB(1, 1, 1)
 
 	methods = []func(surface *blgo.Surface){
 		tile0,
@@ -45,13 +47,18 @@ func main() {
 		for x := 0; x < width+xres; x += xres {
 			yy := float64(y)
 			r, _, _, _ := buffer.GetPixel(x, y)
-			if float64(r) > 0.5 {
-				fmt.Printf("r = %+v\n", r)
-				yy += 3
+			if float64(r) < 128 {
+				yy -= 3
 			}
+			yy += random.FloatRange(-0.5, 0.5)
 			surface.LineTo(float64(x), yy)
 		}
-		surface.Stroke()
+		surface.SetSourceRGB(0, 0, 0)
+		surface.StrokePreserve()
+		surface.SetSourceRGB(1, 1, 1)
+		surface.LineTo(width, height)
+		surface.LineTo(0, height)
+		surface.Fill()
 	}
 	surface.WriteToPNG(filename)
 	util.ViewImage(filename)
