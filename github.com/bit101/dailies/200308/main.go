@@ -14,7 +14,7 @@ const (
 	width       = 800.0
 	res         = 10.0
 	strokeWidth = 1.5 //res / 10
-	drawOutline = false
+	drawOutline = true
 )
 
 var funcs = []func(surface *blgo.Surface, r2 float64){
@@ -79,9 +79,8 @@ func drawHex(surface *blgo.Surface, r float64) {
 
 	drawConnections(surface, r2)
 
-	// i := random.IntRange(0, 5)
-	// surface.Rotate(float64(i) * math.Pi / 3)
-	surface.Rotate(math.Pi / 3)
+	i := random.IntRange(0, 5)
+	surface.Rotate(float64(i) * math.Pi / 3)
 
 	surface.SetLineWidth(strokeWidth)
 	j := random.IntRange(0, len(funcs)-1)
