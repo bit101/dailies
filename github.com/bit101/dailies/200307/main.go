@@ -10,31 +10,21 @@ import (
 )
 
 const (
-	height      = 800.0
-	width       = 800.0
-	res         = 10.0
-	strokeWidth = 1.5 //res / 10
-	drawOutline = true
+	height = 800.0
+	width  = 800.0
+	res    = 50.0
 )
-
-var funcs = []func(surface *blgo.Surface, r2 float64){
-	drawTile1,
-	drawTile2,
-	drawTile3,
-	drawTile4,
-	drawTile5,
-	drawTile6,
-}
 
 var filename = util.ParentDir() + ".png"
 
 func main() {
 	surface := blgo.NewSurface(width, height)
 	surface.ClearRGB(1, 1, 1)
+	surface.SetLineWidth(0.25)
 	surface.Translate(0.5, 0.5)
 	surface.SetLineJoin(cairo.LineJoinRound)
 
-	hexGrid(surface, 0, 0, width, height, res, drawHex)
+	hexGrid(surface, 0, 0, width, height, 40, drawHex)
 
 	surface.WriteToPNG(filename)
 	util.ViewImage(filename)
@@ -64,94 +54,33 @@ func hexGrid(surface *blgo.Surface, x, y, w, h, r float64, render func(surface *
 
 func drawHex(surface *blgo.Surface, r float64) {
 	r2 := r * math.Sin(math.Pi/3)
-	if drawOutline {
-		surface.SetLineWidth(0.15)
-		for i := 0.0; i < 6.0; i++ {
-			a := math.Pi / 3 * i
-			surface.LineTo(math.Cos(a)*r, math.Sin(a)*r)
-		}
-		surface.ClosePath()
-		surface.SetSourceRGB(1, 1, 1)
-		surface.FillPreserve()
-		surface.SetSourceRGB(0, 0, 0)
-		surface.Stroke()
+	for i := 0.0; i < 6.0; i++ {
+		a := math.Pi / 3 * i
+		surface.LineTo(math.Cos(a)*r, math.Sin(a)*r)
 	}
+	surface.ClosePath()
+	surface.SetSourceRGB(1, 1, 1)
+	surface.FillPreserve()
+	surface.SetSourceRGB(0, 0, 0)
+	surface.Stroke()
 
-	drawConnections(surface, r2)
+	for i := 0.0; i < 6.0; i++ {
+		a := math.Pi/3*i + math.Pi/6
+		surface.FillCircle(math.Cos(a)*r2, math.Sin(a)*r2, 4)
+	}
 
 	i := random.IntRange(0, 5)
 	surface.Rotate(float64(i) * math.Pi / 3)
-
-	surface.SetLineWidth(strokeWidth)
-	j := random.IntRange(0, len(funcs)-1)
-	funcs[j](surface, r2)
-}
-
-func drawTile1(surface *blgo.Surface, r2 float64) {
-	drawLine1(surface, r2)
+	surface.SetLineWidth(8)
+	drawLine(surface, r2)
 	surface.Rotate(math.Pi)
-	drawLine1(surface, r2)
+	drawLine(surface, r2)
 }
 
-func drawTile2(surface *blgo.Surface, r2 float64) {
-	drawLine2(surface, r2)
-	surface.Rotate(math.Pi)
-	drawLine2(surface, r2)
-}
-
-func drawTile3(surface *blgo.Surface, r2 float64) {
-	drawLine3(surface, r2)
-	surface.Rotate(math.Pi / 3)
-	drawLine1(surface, r2)
-	surface.Rotate(math.Pi)
-	drawLine1(surface, r2)
-}
-
-func drawTile4(surface *blgo.Surface, r2 float64) {
-	drawLine1(surface, r2)
-	surface.Rotate(math.Pi * 2 / 3)
-	drawLine1(surface, r2)
-	surface.Rotate(math.Pi * 2 / 3)
-	drawLine1(surface, r2)
-}
-
-func drawTile5(surface *blgo.Surface, r2 float64) {
-	drawLine3(surface, r2)
-	surface.Rotate(math.Pi * 2 / 3)
-	drawLine2(surface, r2)
-	surface.Rotate(math.Pi)
-	drawLine2(surface, r2)
-}
-
-func drawTile6(surface *blgo.Surface, r2 float64) {
-	drawLine3(surface, r2)
-}
-
-func drawLine1(surface *blgo.Surface, r2 float64) {
-	surface.MoveTo(math.Cos(math.Pi/6)*r2, math.Sin(math.Pi/6)*r2)
-	surface.LineTo(math.Cos(math.Pi/6)*r2/2, math.Sin(math.Pi/6)*r2/2)
-	surface.LineTo(math.Cos(math.Pi/2)*r2/2, math.Sin(math.Pi/2)*r2/2)
-	surface.LineTo(math.Cos(math.Pi/2)*r2, math.Sin(math.Pi/2)*r2)
-	surface.Stroke()
-}
-
-func drawLine2(surface *blgo.Surface, r2 float64) {
+func drawLine(surface *blgo.Surface, r2 float64) {
 	surface.MoveTo(math.Cos(math.Pi/6)*r2, math.Sin(math.Pi/6)*r2)
 	surface.LineTo(math.Cos(math.Pi/6)*r2/2, math.Sin(math.Pi/6)*r2/2)
 	surface.LineTo(math.Cos(math.Pi*5/6)*r2/2, math.Sin(math.Pi*5/6)*r2/2)
 	surface.LineTo(math.Cos(math.Pi*5/6)*r2, math.Sin(math.Pi*5/6)*r2)
 	surface.Stroke()
-}
-
-func drawLine3(surface *blgo.Surface, r2 float64) {
-	surface.MoveTo(math.Cos(math.Pi/6)*r2, math.Sin(math.Pi/6)*r2)
-	surface.LineTo(math.Cos(math.Pi*7/6)*r2, math.Sin(math.Pi*7/6)*r2)
-	surface.Stroke()
-}
-
-func drawConnections(surface *blgo.Surface, r2 float64) {
-	for i := 0.0; i < 6.0; i++ {
-		a := math.Pi/3*i + math.Pi/6
-		surface.FillCircle(math.Cos(a)*r2, math.Sin(a)*r2, strokeWidth/2)
-	}
 }
