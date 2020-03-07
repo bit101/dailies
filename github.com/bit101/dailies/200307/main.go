@@ -72,12 +72,13 @@ func drawHex(surface *blgo.Surface, r float64) {
 	i := random.IntRange(0, 5)
 	surface.Rotate(float64(i) * math.Pi / 3)
 	surface.SetLineWidth(8)
-	drawLine(surface, r2)
-	surface.Rotate(math.Pi)
-	drawLine(surface, r2)
-}
+	surface.MoveTo(math.Cos(math.Pi/6)*r2, math.Sin(math.Pi/6)*r2)
+	surface.LineTo(math.Cos(math.Pi/6)*r2/2, math.Sin(math.Pi/6)*r2/2)
+	surface.LineTo(math.Cos(math.Pi*5/6)*r2/2, math.Sin(math.Pi*5/6)*r2/2)
+	surface.LineTo(math.Cos(math.Pi*5/6)*r2, math.Sin(math.Pi*5/6)*r2)
+	surface.Stroke()
 
-func drawLine(surface *blgo.Surface, r2 float64) {
+	surface.Rotate(math.Pi)
 	surface.MoveTo(math.Cos(math.Pi/6)*r2, math.Sin(math.Pi/6)*r2)
 	surface.LineTo(math.Cos(math.Pi/6)*r2/2, math.Sin(math.Pi/6)*r2/2)
 	surface.LineTo(math.Cos(math.Pi*5/6)*r2/2, math.Sin(math.Pi*5/6)*r2/2)
