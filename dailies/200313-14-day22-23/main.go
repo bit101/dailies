@@ -36,8 +36,6 @@ func main() {
 
 	width = float64(image.GetWidth())
 	height = float64(image.GetHeight())
-	fmt.Printf("width = %+v\n", width)
-	fmt.Printf("height = %+v\n", height)
 	surface := blgo.NewSurface(width, height)
 	surface.ClearRGB(1, 1, 1)
 
